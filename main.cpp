@@ -6,6 +6,16 @@
 
 #include <QDebug>
 
+SOCKET Connection;
+
+void ClientHandler(){
+    char msg[256];
+    while(true){
+        recv(Connection,msg, sizeof(msg),NULL);
+        qDebug() << msg;
+    }
+}
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -22,13 +32,29 @@ int main(int argc, char *argv[])
     addr.sin_port = htons(1989);
     addr.sin_family = AF_INET;
 
-    SOCKET Connection = socket(AF_INET,SOCK_STREAM,NULL);
+    Connection = socket(AF_INET,SOCK_STREAM,NULL);
     // connect != Qt connect because function is reset! :)
     if(connect(Connection,(SOCKADDR*)&addr,sizeof(addr)) != 0){
         qDebug() << "Error: failed connect to server";
         return a.exec();
     }
     qDebug() << "Connected!";
+
+    char msg[256];
+    recv(Connection, msg, sizeof(msg), NULL);
+    qDebug() << msg;
+
+    CreateThread(NULL,NULL,(LPTHREAD_START_ROUTINE)ClientHandler,NULL,NULL,NULL);
+
+    QString ClientMsg;
+    QTextStream cin(stdin);
+    while(true){
+        ClientMsg = cin.readLine();
+        send(Connection, ClientMsg.toStdString().c_str(), sizeof(ClientMsg), NULL);
+        Sleep(10);
+    }
+
+    qDebug() << "exit";
 
     return a.exec();
 }
