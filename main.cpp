@@ -46,15 +46,18 @@ int main(int argc, char *argv[])
 
     CreateThread(NULL,NULL,(LPTHREAD_START_ROUTINE)ClientHandler,NULL,NULL,NULL);
 
-    QString ClientMsg;
     QTextStream cin(stdin);
+    QString ClientMsg;
+    int SizeClientMsg;
+
     while(true){
         ClientMsg = cin.readLine();
+        SizeClientMsg = ClientMsg.size();
+        send(Connection, (char*)SizeClientMsg, sizeof(int),NULL);
         send(Connection, ClientMsg.toStdString().c_str(), sizeof(ClientMsg), NULL);
         Sleep(10);
     }
 
     qDebug() << "exit";
-
     return a.exec();
 }
